@@ -36,6 +36,10 @@ struct element* jobs=NULL;
 
 uint64_t total_edge_weight = 0;
 uint64_t total_edges_processed = 0;
+uint64_t payment_counter = 0;
+uint64_t total_hops = 0;
+double total_success_ratio = 0;
+uint64_t total_prob_counter = 0;
 
 /* intialize the data structures of dijkstra and the jobs to be executed by the dijkstra threads */
 void initialize_dijkstra(long n_nodes, long n_edges, struct array* payments) {
@@ -107,9 +111,18 @@ void run_dijkstra_threads(struct network*  network, struct array* payments, uint
     pthread_join(tid[i], NULL);
 
   double average_edge_weight = (double) total_edge_weight / total_edges_processed;
+  double average_hop = (double) total_hops/payment_counter;
+  double average_success_counter = (double) total_success_ratio/total_prob_counter;
+
   printf("Average Edge Weight: %f\n", average_edge_weight);
   printf("Total Edge : %lu\n", total_edges_processed);
 
+
+  printf("Average Number of Hops : %f\n", average_hop);
+  printf("Payment Counter: %lu\n", payment_counter);
+
+  printf("Success Counter: %lu\n", payment_counter);
+  printf("Average Success Counter: %f\n", average_success_counter);
 }
 
 
@@ -436,7 +449,7 @@ struct array* dijkstra(long source, long target, uint64_t amount, struct network
       tmp_dist = get_probability_based_dist(tmp_weight, tmp_probability);
 
       
-      total_edge_weight = total_edge_weight + edge_weight;
+      total_edge_weight = total_edge_weight + tmp_weight;
       total_edges_processed++;
 
 
@@ -457,8 +470,13 @@ struct array* dijkstra(long source, long target, uint64_t amount, struct network
 
       distance_heap[p] = heap_insert_or_update(distance_heap[p], &distance[p][from_node_id], compare_distance, is_key_equal);
     }
-
   }
+
+  total_hops = total_hops + distance[p][source].hop_number;
+  payment_counter++;
+
+  total_success_ratio = total_success_ratio + distance[p][source].probability;
+  total_prob_counter++;
 
 
   // Code to find the hops required in the shortest path

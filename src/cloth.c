@@ -319,24 +319,21 @@ int main(int argc, char *argv[]) {
   n_edges = array_len(network->edges);
 
 
-  printf("No of Nodes: %ld\n", n_nodes);
-
-
   printf("PAYMENTS INITIALIZATION\n");
   payments = initialize_payments(pay_params,  n_nodes, simulation->random_generator);
   printf("EVENTS INITIALIZATION\n");
-  simulation->events = initialize_events(payments);       // 
+  simulation->events = initialize_events(payments);       
   initialize_dijkstra(n_nodes, n_edges, payments);          // routing.c 
-
-
 
   // Dijkstra Output
   printf("INITIAL DIJKSTRA THREADS EXECUTION\n");
+
+  printf("\nNo of Nodes: %ld\n", n_nodes);
   clock_gettime(CLOCK_MONOTONIC, &start);
   run_dijkstra_threads(network, payments, 0);
   clock_gettime(CLOCK_MONOTONIC, &finish);
   time_spent_thread = finish.tv_sec - start.tv_sec;
-  printf("Time consumed by initial dijkstra executions: %ld s\n", time_spent_thread);
+  printf("\nTime consumed by initial dijkstra executions: %ld s\n", time_spent_thread);
 
   printf("EXECUTION OF THE SIMULATION\n");
   /* core of the discrete-event simulation: extract next event, advance simulation time, execute the event */

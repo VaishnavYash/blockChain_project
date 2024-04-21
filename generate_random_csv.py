@@ -3,16 +3,15 @@ import random
 import pandas as pd
 
 # Number of nodes and edges
-num_nodes = 10  # Change this number to set the desired number of nodes
-num_edges = 15  # Change this number to set the desired number of edges
+num_nodes = 6005
+num_edges = 60915
 num_channels = num_edges  # Each edge and its counter edge make a channel
 
 # Generate nodes
 nodes = [{'id': i} for i in range(num_nodes)]
 
-# Generate edges and channels
+# Generate edges
 edges = []
-channels = []
 
 for i in range(num_edges):
     from_node_id = random.randint(0, num_nodes - 1)
@@ -39,28 +38,21 @@ for i in range(num_edges):
         'timelock': timelock
     }
     
-    counter_edge = {
-        'id': i + num_edges,
-        'from_node_id': to_node_id,
-        'to_node_id': from_node_id,
-        'balance': balance,
-        'fee_base': fee_base,
-        'fee_proportional': fee_proportional,
-        'min_htlc': min_htlc,
-        'timelock': timelock
-    }
-    
+    edges.append(edge)
+
+# Generate channels
+channels = []
+
+for i in range(num_edges):
     channel = {
         'id': i,
         'edge1_id': i,
-        'edge2_id': i + num_edges,
-        'node1_id': from_node_id,
-        'node2_id': to_node_id,
+        'edge2_id': (i + num_edges) % num_edges,  # Ensure each edge has a corresponding counter edge
+        'node1_id': edges[i]['from_node_id'],
+        'node2_id': edges[i]['to_node_id'],
         'capacity': random.randint(1100000, 5E+11)
     }
     
-    edges.append(edge)
-    edges.append(counter_edge)
     channels.append(channel)
 
 # Write nodes to nodes_ln.csv
